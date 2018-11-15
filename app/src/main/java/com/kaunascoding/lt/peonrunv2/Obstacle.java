@@ -18,7 +18,7 @@ public class Obstacle extends GameObject {
         widht=w;
         height=h;
         //obstacle judejimo greitis
-        speed = 25;
+        speed = GamePanel.MOVINGSPEED*(-1);
 
         //sukuriam bit map table obstacles
 
@@ -49,13 +49,13 @@ public class Obstacle extends GameObject {
             canvas.drawBitmap(animation.getImage(),x,y,null);
     }
 
-    @Override
-    public int getWidht() {
-        return widht-10;
-    }
-
-    @Override
-    public int getHeight() {
-        return height-10;
-    }
+//    @Override
+//    public int getWidht() {
+//        return widht-10;
+//    }
+//
+//    @Override
+//    public int getHeight() {
+//        return height-10;
+//    }
 }

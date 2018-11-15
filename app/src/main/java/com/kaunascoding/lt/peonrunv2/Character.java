@@ -49,7 +49,7 @@ public class Character extends GameObject{
         //setting animation and adding delay
 
         animation.setFrames(image);
-        animation.setDelay(10);//su 100 oke
+        animation.setDelay(100);//su 100 oke
 
         //timeris kad galetumem naudot update method
         startTime=System.nanoTime();
@@ -98,7 +98,7 @@ public class Character extends GameObject{
     }
     public boolean getPlaying(){return playing;}
     public void setPlaying(boolean b){playing = b;}
-    public void resetDYA(){dya = 0;}
+    public void resetdistance(){distance = 0;}// buvo reset DYA DYA = 0
     public int getDistance (){return  distance;}
 
 

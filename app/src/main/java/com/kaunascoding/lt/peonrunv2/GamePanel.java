@@ -23,8 +23,19 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
     public static final int MOVINGSPEED = -25;//50
     private Background bgrd;
+    private int collisioncounter = 0;
 
     private Character character;
+
+    private GameOver gameover;
+    private ArrayList<Obstacle> currentCollisions;
+
+    //    variables for game reseting
+    private boolean newGameCreation;  // naujo game gaacreastion var
+    private long startReset;          // reset time var ty kiek laiko uztruks
+    private boolean reset;            // pats reset var
+    private boolean dissapear;        //char on collisiton dissapearing
+    private boolean started;          // ar game started var
 
     //obstacle
 
@@ -39,7 +50,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     public GamePanel(Context context) {
         super(context);
         //obj
-
+        currentCollisions = new ArrayList<>();
 
         //gamepanel surface makes focusable for haldling events
         setFocusable(true);
@@ -55,6 +66,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
         //in game draw image
         bgrd = new Background(BitmapFactory.decodeResource(getResources(), R.drawable.background));
+        gameover = new GameOver(BitmapFactory.decodeResource(getResources(), R.drawable.gameover));
 
         //REIKES EDITING cia kad graziai BUTU
         character = new Character(BitmapFactory.decodeResource(getResources(), R.drawable.characterrun), 321, 270, 4);
@@ -109,67 +121,76 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             }
             return true;
         }
-        if (event.getAction() == MotionEvent.ACTION_UP) {
-            character.setJump(false);
-            return true;
-        }
+//        if (event.getAction() == MotionEvent.ACTION_UP) {
+//            character.setJump(false);
+//            return true;
+//        }
 
         return super.onTouchEvent(event);
     }
 
     //pagal ideja game kiekviena sec or less turetu updatintis ir taip veikti viskas i hope so...
+    private boolean colliding = false;
 
     public void update() {
         if (character.getPlaying()) {
             bgrd.update();
             character.update();
 
-//              border nereik nes padariau kad nekristu char
-//            long borderElapsed = (System.nanoTime() - borderStartTime) / 1000000;
-//            if (borderElapsed > 100) {
-//                borders.add(new Border(BitmapFactory.decodeResource(getResources(), R.drawable.border), WIDTH, 960));
-//                borderStartTime = System.nanoTime();
-//            }
-//            for (int i = 0; i < obstacle.size(); i++) {
-//                //update obstacle
-//                obstacle.get(i).update();
-//
-//                if (obstacle.get(i).getX() < 10) {
-//                    obstacle.remove(i);
-//                }
-//            }
-//////            NEMOKU OBSTACLE PADARYTI
+
+//            Moku OBSTACLE PADARYTI
             long obstacleElapsed = (System.nanoTime() - obstacleStartTime) / 1000000;
 
             if (obstacleElapsed > 2500) {
 
                 obstacle.add(new Obstacle(BitmapFactory.decodeResource(getResources(), R.drawable.obstacle),
                         1800, 830, 135, 135, 1));
-//                //smth bandymas kad judetu
+                //smth bandymas kad judetu
 
                 obstacleStartTime = System.nanoTime();
             }
+
             for (int i = 0; i < obstacle.size(); i++) {
+
                 //update obstacle
                 obstacle.get(i).update();
-                if (collision(obstacle.get(i), character)) {
-                    character.setPlaying(false);
+                if (collision(obstacle.get(i), character) && currentCollisions.indexOf(obstacle) == -1) {
+                    currentCollisions.add(obstacle.get(i));
 
                 }
-                if (obstacle.get(i).getX() < 50) {
-                    obstacle.remove(i);
+                if (!collision(obstacle.get(i), character) && currentCollisions.indexOf(obstacle) != -1) {
+                    currentCollisions.remove(obstacle.get(i));
+
                 }
+
+            }//end of for
+            if (currentCollisions.size() > 0 && colliding == false) {
+                colliding = true;
+                collisioncounter++;
+                System.out.println(collisioncounter);
+                if (collisioncounter >= 10) {
+                    character.setPlaying(false);
+                }
+
+
             }
+            if (currentCollisions.size() <= 0 && colliding == true) {
+                colliding = false;
+            }
+
 
         }
     }//end of update
+
     //collision meth
-    public boolean collision(GameObject character, GameObject obstacle){
-        if(Rect.intersects(character.getRectangle(),obstacle.getRectangle())){
+    public boolean collision(GameObject character, GameObject obstacle) {
+
+
+        if (Rect.intersects(character.getRectangle(), obstacle.getRectangle())) {
             return true;
         }
         return false;
-    }
+    }//end of collision
 
     @Override
     public void draw(Canvas canvas) {
@@ -194,21 +215,24 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
 
             }
+            if (collisioncounter >= 10) {
+                gameover.draw(canvas);
+            }
             drawText(canvas);
         }
 
-    }
+    }//end of draw
 
     //drawing score methid
-    public void  drawText(Canvas canvas){
+    public void drawText(Canvas canvas) {
 
         Paint paint = new Paint();
         paint.setColor(Color.BLACK);
         paint.setTextSize(50);
-        paint.setTypeface(Typeface.create(Typeface.DEFAULT,Typeface.BOLD_ITALIC));
-        canvas.drawText("Distance" + (character.getDistance()*2), 10,50, paint);
+        paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD_ITALIC));
+        canvas.drawText("Distance  " + (character.getDistance() * 2), 10, 50, paint);
 
-    }
+    }//end of drawtext
 
 
 }//end of gamepanel
